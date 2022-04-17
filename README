@@ -1,0 +1,14 @@
+This is a minecraft plugin that changes behaviour of bows and crossbows.
+By default, arrow spread is dissabled.
+To customise bow behaviour add scoreboard objectives `dansplugin_vel` and
+`dansplugin_acc`.
+
+`dansplugin_acc` holds a score for each player. The greater this score, the more
+arrow spread that players bows and crossbows shoot with. 15 is a resonable value.
+
+`dansplugin_vel` holds a score for each player. A score of 100 does not affect
+that players bow velocity. A score greater than 100 increases that players arrow
+velocity and a score below 100 reduces that players arrow velocity. 200 doubles
+velocity. For some reason changing arrow velocity too much can make the arrows
+look like they are not going in the correct direction when in flight but this is
+just visual, they will land in the correct position.
