@@ -13,82 +13,61 @@ import org.bukkit.util.Vector;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Objective;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.Command;
+import org.bukkit.Sound;
 
 import java.lang.IllegalArgumentException;
 
-public class DansPlugin extends JavaPlugin implements Listener {
+public class DansPlugin extends JavaPlugin {
+
+    GunType glock;
 
     @Override
     public void onEnable()
     {
-        getServer().getPluginManager().registerEvents(this, this);
+        saveDefaultConfig();
+        reloadGunConfig();
+        getCommand("rlcf").setExecutor(this);
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onProjectileFire(ProjectileLaunchEvent event)
+    private void reloadGunConfig()
     {
-        ProjectileSource source = event.getEntity().getShooter();
-        if(source instanceof Player) {
-            Player player = (Player) source;
-
-            Entity projectile = event.getEntity();
-            Vector perfectDirection = player.getEyeLocation().getDirection().clone().normalize();
-
-            double accruacy = getPlayerAccruacy(player);
-            double velocityMultiplier = getPlayerVelocity(player);
-
-            updateProjectileVelocity(projectile, perfectDirection, accruacy, velocityMultiplier);
+        reloadConfig();
+        if (glock != null) {
+            glock.unregister(this);
         }
+        FileConfiguration conf = this.getConfig();
+        String gunPath = "guns.glock";
+        glock = new GunType(
+            this,
+            conf.getString(gunPath + ".name"),
+            conf.getDouble(gunPath + ".projYBias"),
+            conf.getDouble(gunPath + ".velocity"),
+            conf.getDouble(gunPath + ".accBase"),
+            conf.getDouble(gunPath + ".accHeatEffect"),
+            conf.getDouble(gunPath + ".heatAdd"),
+            conf.getDouble(gunPath + ".heatDec"),
+            conf.getDouble(gunPath + ".heatMax"),
+            Sound.ENTITY_ARROW_SHOOT,
+            1.0f,
+            1.0f);
+                
     }
 
-    private double getPlayerAccruacy(Player player) {
-        try {
-            return getPlayerScore("dansplugin_acc", player) / 100.0;
-        } catch (IllegalArgumentException e) {
-            return 0;
-        }
-    }
-
-    private double getPlayerVelocity(Player player) {
-        try {
-            return getPlayerScore("dansplugin_vel", player) / 100.0;
-        } catch (IllegalArgumentException e) {
-            return 1.0;
-        }
-    }
-
-    private int getPlayerScore(String objectiveName, Player player) {
-        String playerName = player.getName();
-
-        ScoreboardManager scoreManager = Bukkit.getScoreboardManager();
-        Scoreboard scoreboard = scoreManager.getMainScoreboard();
-        Objective objective = scoreboard.getObjective(objectiveName);
-        if (objective == null) {
-            throw new IllegalArgumentException();
-        }
-        int score = objective.getScore(playerName).getScore();
-        return score;
-    }
-
-    private void updateProjectileVelocity(
-            Entity projectile,
-            Vector perfectDirection,
-            double accruacy,
-            double velocityMultiplier)
+    @Override
+    public boolean onCommand(
+            CommandSender sender,
+            Command command,
+            String label,
+            String[] args)
     {
-        double projectileVelocity = projectile.getVelocity().length();
-
-        Vector horozontalVector
-            = perfectDirection.clone().crossProduct(new Vector(0, 1, 0));
-        Vector verticalVector
-            = perfectDirection.clone().crossProduct(horozontalVector);
-
-        Vector newDirection = perfectDirection.clone()
-            .add(horozontalVector.multiply((Math.random() - 0.5) * accruacy))
-            .add(verticalVector.multiply((Math.random() - 0.5) * accruacy))
-            .normalize();
-
-        Vector newVelocity = newDirection.clone().multiply(projectileVelocity * velocityMultiplier);
-        projectile.setVelocity(newVelocity);
+        System.out.println("reloading config");
+        reloadGunConfig();
+        return true;
     }
+
+
 }
