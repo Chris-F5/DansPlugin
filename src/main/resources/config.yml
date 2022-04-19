@@ -1,10 +1,61 @@
 guns:
   glock:
     name: glock
-    projYBias: 0.05
-    velocity: 5.0
-    accBase: 0.0
+    fullAuto: false
+    fullAutoCharge: 5
+    shootInterval: 6
+    projectileCount: 5
+    projYBias: 3
+    velocity: 4.0
+    damage: 1.0
+    knockback: 1
+    pierce: 1
+    gravity: true
+    accBase: 6.0
     accHeatEffect: 1.0
-    heatAdd: 8.0
+    heatAdd: 12.0
     heatDec: 1.0
     heatMax: 20.0
+    soundVol: 1.0
+    soundPitch: 1.0
+
+  pump:
+    name: pump_shotgun
+    fullAuto: false
+    fullAutoCharge: 5
+    shootInterval: 20
+    projectileCount: 8
+    projYBias: 8
+    velocity: 1
+    damage: 6.0
+    knockback: 3
+    pierce: 1
+    gravity: true
+    accBase: 30.0
+    accHeatEffect: 0.0
+    heatAdd: 0.0
+    heatDec: 0.0
+    heatMax: 0.0
+    soundVol: 1.0
+    soundPitch: 1.0
+
+  ak:
+    name: AK47
+    fullAuto: true
+    fullAutoCharge: 5
+    shootInterval: 2
+    projectileCount: 1
+    projYBias: 2
+    velocity: 5.0
+    damage: 1.0
+    knockback: 1
+    pierce: 1
+    gravity: true
+    accBase: 7.0
+    accHeatEffect: 1.0
+    heatAdd: 4.0
+    heatDec: 1.0
+    heatMax: 15.0
+    soundVol: 1.0
+    soundPitch: 0.8
+

@@ -19,15 +19,17 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.Sound;
 
+import java.util.Set;
+import java.util.HashSet;
 import java.lang.IllegalArgumentException;
 
 public class DansPlugin extends JavaPlugin {
-
-    GunType glock;
+    Set<GunType> guns;
 
     @Override
     public void onEnable()
     {
+        guns = new HashSet<GunType>();
         saveDefaultConfig();
         reloadGunConfig();
         getCommand("rlcf").setExecutor(this);
@@ -36,25 +38,38 @@ public class DansPlugin extends JavaPlugin {
     private void reloadGunConfig()
     {
         reloadConfig();
-        if (glock != null) {
-            glock.unregister(this);
+        for(GunType gun : guns) {
+            gun.unregister(this);
         }
+        guns.clear();
+
         FileConfiguration conf = this.getConfig();
-        String gunPath = "guns.glock";
-        glock = new GunType(
-            this,
-            conf.getString(gunPath + ".name"),
-            conf.getDouble(gunPath + ".projYBias"),
-            conf.getDouble(gunPath + ".velocity"),
-            conf.getDouble(gunPath + ".accBase"),
-            conf.getDouble(gunPath + ".accHeatEffect"),
-            conf.getDouble(gunPath + ".heatAdd"),
-            conf.getDouble(gunPath + ".heatDec"),
-            conf.getDouble(gunPath + ".heatMax"),
-            Sound.ENTITY_ARROW_SHOOT,
-            1.0f,
-            1.0f);
-                
+        Set<String> gunKeys = conf.getConfigurationSection("guns").getKeys(false);
+        for(String gunKey : gunKeys) {
+            String gunPath = "guns." + gunKey;
+            guns.add(new GunType(
+                    this,
+                    conf.getString(gunPath + ".name"),
+                    conf.getBoolean(gunPath + ".fullAuto"),
+                    conf.getInt(gunPath + ".fullAutoCharge"),
+                    conf.getInt(gunPath + ".shootInterval"),
+                    conf.getInt(gunPath + ".projectileCount"),
+                    conf.getDouble(gunPath + ".projYBias"),
+                    conf.getDouble(gunPath + ".velocity"),
+                    conf.getDouble(gunPath + ".damage"),
+                    conf.getInt(gunPath + ".knockback"),
+                    conf.getInt(gunPath + ".pierce"),
+                    conf.getBoolean(gunPath + ".gravity"),
+                    conf.getDouble(gunPath + ".accBase"),
+                    conf.getDouble(gunPath + ".accHeatEffect"),
+                    conf.getDouble(gunPath + ".heatAdd"),
+                    conf.getDouble(gunPath + ".heatDec"),
+                    conf.getDouble(gunPath + ".heatMax"),
+                    Sound.ENTITY_ARROW_SHOOT,
+                    conf.getDouble(gunPath + ".soundVol"),
+                    conf.getDouble(gunPath + ".soundPitch")
+                    ));
+        }
     }
 
     @Override
