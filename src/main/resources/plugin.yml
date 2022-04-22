@@ -5,3 +5,11 @@ api-version: 1.13
 
 commands:
   rlcf:
+    description: Reloads config file for DansPlugin
+    usage: /<command>
+  buy:
+    description: Buy items
+    usage: /<command> <item>
+  cash:
+    description: Prints your cash
+    usage: /cash

@@ -1,61 +1,42 @@
+messages:
+  purchase: "You purchased a &e&l%s&f for &a%d$"
+  after-purchase-cash: "You now have &a%d$"
+  cant-afford: "&cYou cant afford &n%s&f ( &a%d$ &f/ &c%d$ &f)"
+  gun-not-exist: "&c'%s' does not exist. Do '/buy list' to list all guns."
+  gun-list-start: "===== &b&lGUN LIST&f ====="
+  gun-list-format: "&a%4d$&f &e%s&f | %s"
+  gun-list-end:   "-> You have &a%d$"
+  cash: "You have &a%d$"
+
 guns:
   glock:
-    name: glock
-    fullAuto: false
-    fullAutoCharge: 5
-    shootInterval: 6
-    projectileCount: 5
-    projYBias: 3
+    name: Glock
+    item-display-name: "&r&7Glock"
+    description: a pistol
+    aliases: ["glock", "pistol"]
+    item-material: STONE_HOE
+    cost: 100
+
+    full-auto: false
+    full-auto-charge: 5
+    shoot-tick-interval: 6
+
+    projectile-count: 1
+    gravity: true
+    projectile-y-bias: 3
+
     velocity: 4.0
     damage: 1.0
     knockback: 1
     pierce: 1
-    gravity: true
-    accBase: 6.0
-    accHeatEffect: 1.0
-    heatAdd: 12.0
-    heatDec: 1.0
-    heatMax: 20.0
-    soundVol: 1.0
-    soundPitch: 1.0
 
-  pump:
-    name: pump_shotgun
-    fullAuto: false
-    fullAutoCharge: 5
-    shootInterval: 20
-    projectileCount: 8
-    projYBias: 8
-    velocity: 1
-    damage: 6.0
-    knockback: 3
-    pierce: 1
-    gravity: true
-    accBase: 30.0
-    accHeatEffect: 0.0
-    heatAdd: 0.0
-    heatDec: 0.0
-    heatMax: 0.0
-    soundVol: 1.0
-    soundPitch: 1.0
+    base-accruacy: 6.0
+    sneek-accruacy-modifier: -6.0
+    accruacy-heat-effect: 1.0
+    heat-add: 12.0
+    heat-sub: 1.0
+    heat-max: 20.0
 
-  ak:
-    name: AK47
-    fullAuto: true
-    fullAutoCharge: 5
-    shootInterval: 2
-    projectileCount: 1
-    projYBias: 2
-    velocity: 5.0
-    damage: 1.0
-    knockback: 1
-    pierce: 1
-    gravity: true
-    accBase: 7.0
-    accHeatEffect: 1.0
-    heatAdd: 4.0
-    heatDec: 1.0
-    heatMax: 15.0
-    soundVol: 1.0
-    soundPitch: 0.8
-
+    sound: ENTITY_ARROW_SHOOT
+    sound-volume: 1.0 # 0 - 1
+    sound-pitch: 1.0 # 0 - 1

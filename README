@@ -1,4 +1,7 @@
-This is a minecraft plugin that changes behaviour of bows and crossbows.
-By default, arrow spread is dissabled.
+This is a minecraft that adds guns a gun shop to the game.
 
-right click item named "glock" to shoot
+```
+/buy
+/cash
+/rlcf
+```

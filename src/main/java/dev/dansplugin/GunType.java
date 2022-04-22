@@ -1,14 +1,11 @@
 package dev.dansplugin;
 
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Objective;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.AbstractArrow.PickupStatus;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,11 +19,19 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.event.HandlerList;
 import org.bukkit.Sound;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.Material;
+import org.bukkit.ChatColor;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class GunType extends BukkitRunnable implements Listener {
     String gunName;
+    String itemDisplayName;
+    String description;
+    List<String> aliases;
+    Material gunMaterial;
+    int cost;
 
     boolean fullauto;
     int fullautoChargeAmount;
@@ -42,6 +47,8 @@ public class GunType extends BukkitRunnable implements Listener {
     int projectileCount;
 
     double baseAccruacy;
+    double sneekAccruacy;
+    double movementAccruacy;
     double heatAccruacyEffect;
     double heatAdd;
     double heatDecay;
@@ -61,63 +68,64 @@ public class GunType extends BukkitRunnable implements Listener {
 
     public GunType(
             Plugin plugin,
-            String name,
-            boolean fullauto,
-            int fullautoChargeAmount,
-            int shootInterval,
-            int projectileCount,
-            double projectileYBias,
-            double velocity,
-            double damage,
-            int knockback,
-            int pierce,
-            boolean gravity,
-            double baseAccruacy,
-            double heatAccruacyEffect,
-            double heatAdd,
-            double heatDecay,
-            double heatMax,
-            Sound shootSound,
-            double shootSoundVolume,
-            double shootSoundPitch)
-            {
-                this.gunName = name;
+            FileConfiguration conf,
+            String gunKey)
+    {
+        String p = "guns." + gunKey;
+        this.gunName = conf.getString(p + ".name");
+        this.itemDisplayName = ChatColor.translateAlternateColorCodes(
+                '&', conf.getString(p + ".item-display-name"));
+        this.description = conf.getString(p + ".description");
+        this.aliases = conf.getStringList(p + ".aliases");
+        this.gunMaterial = Material.valueOf(conf.getString(p + ".item-material"));
+        this.cost = conf.getInt(p + ".cost");
 
-                this.fullauto = fullauto;
-                this.fullautoChargeAmount = fullautoChargeAmount;
-                this.shootInterval = shootInterval;
-                this.projectileCount = projectileCount;
+        this.fullauto = conf.getBoolean(p + ".full-auto");
+        this.fullautoChargeAmount = conf.getInt(p + ".full-auto-charge");
+        this.shootInterval = conf.getInt(p + ".shoot-tick-interval");
+        this.projectileCount = conf.getInt(p + ".projectile-count");
 
-                this.projectileYBias = projectileYBias;
-                this.velocity = velocity;
-                this.damage = damage;
-                this.knockback = knockback;
-                this.pierce = pierce;
-                this.gravity = gravity;
+        this.projectileYBias = conf.getDouble(p + ".projectile-y-bias");
+        this.velocity = conf.getDouble(p + ".velocity");
+        this.damage = conf.getDouble(p + ".damage") / velocity;
+        this.knockback = conf.getInt(p + ".knockback");
+        this.pierce = conf.getInt(p + ".pierce");
+        this.gravity = conf.getBoolean(p + ".gravity");
 
-                this.baseAccruacy = baseAccruacy;
-                this.heatAccruacyEffect = heatAccruacyEffect;
-                this.heatAdd = heatAdd;
-                this.heatDecay = heatDecay;
-                this.heatMax = heatMax;
+        this.baseAccruacy = conf.getDouble(p + ".base-accruacy");
+        this.sneekAccruacy = conf.getDouble(p + ".sneek-accruacy-modifier");
+        this.heatAccruacyEffect = conf.getDouble(p + ".accruacy-heat-effect");
+        this.heatAdd = conf.getDouble(p + ".heat-add");
+        this.heatDecay = conf.getDouble(p + ".heat-sub");
+        this.heatMax = conf.getDouble(p + ".heat-max");
 
-                this.shootSound = shootSound;
-                this.shootSoundVolume = (float)shootSoundVolume;
-                this.shootSoundPitch = (float)shootSoundPitch;
+        this.shootSound = Sound.valueOf(conf.getString(p + ".sound"));
+        this.shootSoundVolume = (float)conf.getDouble(p + ".sound-volume");
+        this.shootSoundPitch = (float)conf.getDouble(p + ".sound-pitch");
 
-                this.heats = new HashMap<Player, Double>();
-                this.cooldowns = new HashMap<Player, Integer>();
-                this.fullautoCharge = new HashMap<Player, Integer>();
+        this.heats = new HashMap<Player, Double>();
+        this.cooldowns = new HashMap<Player, Integer>();
+        this.fullautoCharge = new HashMap<Player, Integer>();
 
-                Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-                heatObjective = scoreboard.getObjective("heat");
-                if (heatObjective == null) {
-                    heatObjective = scoreboard.registerNewObjective("heat", "dummy", "heat");
-                }
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+        heatObjective = scoreboard.getObjective("heat");
+        if (heatObjective == null) {
+            heatObjective = scoreboard.registerNewObjective("heat", "dummy", "heat");
+        }
 
-                decayTask = this.runTaskTimer(plugin, 1, 1);
-                plugin.getServer().getPluginManager().registerEvents(this, plugin);
-            }
+        decayTask = this.runTaskTimer(plugin, 1, 1);
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    }
+
+    public void giveToPlayer(Player p) {
+        ItemStack item = new ItemStack(gunMaterial);
+
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(itemDisplayName);
+        item.setItemMeta(meta);
+
+        p.getInventory().addItem(item);
+    }
 
     public void unregister(Plugin plugin) {
         HandlerList.unregisterAll(this);
@@ -128,6 +136,10 @@ public class GunType extends BukkitRunnable implements Listener {
     public void run()
     {
         for(Player p : cooldowns.keySet()) {
+            if(!p.isOnline()) {
+                cooldowns.remove(p);
+                break;
+            }
             Integer cooldown = cooldowns.get(p);
             if (cooldown > 0) {
                 cooldowns.put(p, cooldown - 1);
@@ -136,6 +148,10 @@ public class GunType extends BukkitRunnable implements Listener {
 
         if (fullauto) {
             for(Player p : fullautoCharge.keySet()) {
+                if(!p.isOnline()) {
+                    fullautoCharge.remove(p);
+                    break;
+                }
                 Integer charge = fullautoCharge.get(p);
                 if(charge > 0) {
                     if(cooldowns.getOrDefault(p, 0) == 0) {
@@ -147,6 +163,11 @@ public class GunType extends BukkitRunnable implements Listener {
         }
 
         for(Player p : heats.keySet()) {
+            if(!p.isOnline()) {
+                heats.remove(p);
+                break;
+            }
+
             Double heat = heats.get(p);
             if (heat > heatDecay) {
                 heat -= heatDecay;
@@ -159,9 +180,10 @@ public class GunType extends BukkitRunnable implements Listener {
             if(item != null) {
                 ItemMeta meta = item.getItemMeta();
                 if(meta != null) {
-                    String displayName = meta.getDisplayName();
+                    String displayName = ChatColor.stripColor(meta.getDisplayName());
+                    String strippedItemName = ChatColor.stripColor(itemDisplayName);
                     if(displayName != null) {
-                        if (displayName.equals(gunName)) {
+                        if (displayName.equals(strippedItemName)) {
                             heatObjective.getScore(p.getName()).setScore((int)(100 * heat / heatMax));
                         }
                     }
@@ -171,26 +193,15 @@ public class GunType extends BukkitRunnable implements Listener {
     }
 
     @EventHandler
-    public void onDamage(EntityDamageByEntityEvent e) {
-        Entity d = (Entity) e.getDamager();
-        if (d instanceof Arrow) {
-            Entity hit = (Entity) e.getEntity();
-            if (hit instanceof LivingEntity) {
-                ((LivingEntity) hit).setMaximumNoDamageTicks(0);
-                ((LivingEntity) hit).setNoDamageTicks(0);
-            }
-        }
-
-    }
-
-    @EventHandler
     public void onInteract(PlayerInteractEvent event)
     {
         ItemStack item = event.getItem();
         if (item != null && event.getHand() == EquipmentSlot.HAND) {
-            String itemName = item.getItemMeta().getDisplayName();
             Player player = event.getPlayer();
-            if(itemName.equals(gunName)) {
+
+            String displayName = ChatColor.stripColor(item.getItemMeta().getDisplayName());
+            String strippedItemName = ChatColor.stripColor(itemDisplayName);
+            if(displayName.equals(strippedItemName)) {
                 if(fullauto) {
                     fullautoCharge.put(player, fullautoChargeAmount);
                 }
@@ -253,7 +264,16 @@ public class GunType extends BukkitRunnable implements Listener {
     }
 
     private double getPlayerAccruacy(Player player) {
-        return baseAccruacy + heats.getOrDefault(player, 0d) * heatAccruacyEffect;
+        Vector playerVelocity = player.getVelocity().clone();
+        playerVelocity.setY(0);
+        double acc
+            = baseAccruacy
+            + heats.getOrDefault(player, 0d) * heatAccruacyEffect
+            + playerVelocity.length() * movementAccruacy;
+        if(player.isSneaking()) {
+            acc += sneekAccruacy;
+        }
+        return Double.max(0, acc);
     }
 
     private double getPlayerVelocity(Player player) {
