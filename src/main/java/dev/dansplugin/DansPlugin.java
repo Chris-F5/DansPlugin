@@ -15,12 +15,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.Listener;
 
 import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
 
-public class DansPlugin extends JavaPlugin {
+public class DansPlugin extends JavaPlugin implements Listener {
     List<GunType> guns;
     Objective cashObjective;
 
@@ -51,6 +52,8 @@ public class DansPlugin extends JavaPlugin {
         getCommand("buy").setTabCompleter(this);
         getCommand("cash").setExecutor(this);
         getCommand("cash").setTabCompleter(this);
+
+        this.getServer().getPluginManager().registerEvents(this, this);
     }
 
     private void reloadDansPluginConfig()

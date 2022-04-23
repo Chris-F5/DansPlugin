@@ -138,7 +138,7 @@ public class GunType extends BukkitRunnable implements Listener {
         for(Player p : cooldowns.keySet()) {
             if(!p.isOnline()) {
                 cooldowns.remove(p);
-                break;
+                continue;
             }
             Integer cooldown = cooldowns.get(p);
             if (cooldown > 0) {
@@ -150,7 +150,7 @@ public class GunType extends BukkitRunnable implements Listener {
             for(Player p : fullautoCharge.keySet()) {
                 if(!p.isOnline()) {
                     fullautoCharge.remove(p);
-                    break;
+                    continue;
                 }
                 Integer charge = fullautoCharge.get(p);
                 if(charge > 0) {
@@ -165,7 +165,7 @@ public class GunType extends BukkitRunnable implements Listener {
         for(Player p : heats.keySet()) {
             if(!p.isOnline()) {
                 heats.remove(p);
-                break;
+                continue;
             }
 
             Double heat = heats.get(p);
